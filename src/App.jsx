@@ -3,9 +3,9 @@ import { useDispatch } from "react-redux";
 import authService from "./appwrite/auth";
 import { login, logout } from "./store/authSlice";
 import { Outlet } from "react-router-dom";
-import Header from "./components/Header/Header";
-import Footer from "./components/Footer/Footer";
+import Header from "./components/Header/header";
 
+import Footer from "./components/Footer/Footer";
 
 function App() {
   const dispatch = useDispatch();
@@ -13,18 +13,31 @@ function App() {
 
   useEffect(() => {
     const loadUser = async () => {
-      const user = await authService.getCurrentUser();
-      if (user) {
-        dispatch(login(user));
-      } else {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          dispatch(login(user));
+        } else {
+          dispatch(logout());
+        }
+      } catch (error) {
+        console.error("Auth error:", error);
         dispatch(logout());
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
+
     loadUser();
   }, [dispatch]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <>
